@@ -9,14 +9,14 @@ const github = require('@actions/github');
  */
 async function checkout({token, repo, path, owner}) {
     const gh = github.getOctokit(token);
-    const document = await gh.request(`GET /repos/{owner}/{repo}/contents/{path}`, {
+    const resp = await gh.request(`GET /repos/{owner}/{repo}/contents/{path}`, {
         owner, path, repo, headers: {
             'X-GitHub-Api-Version': '2022-11-28',
             'Accept': 'application/vnd.github.raw+json'
         }
     });
-    console.log(document);
-    return document;
+    const document = resp.data;
+    return JSON.parse(document);
 }
 
 module.exports = {checkout};
