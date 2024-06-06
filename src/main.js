@@ -28,6 +28,7 @@ async function main() {
                 owner: args["gh-account-owner"]
             }
             const document = await checkout(options);
+            console.log(document);
         }
 
         core.setOutput("time", "ABC");
