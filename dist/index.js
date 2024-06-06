@@ -38411,7 +38411,7 @@ module.exports = JSON.parse('{"$id":"jack-gronenthal-sn/sbom-action-beta/input.s
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"$schema":"http://json-schema.org/draft-07/schema#","type":"object","properties":{"type":{"type":"string","enum":["repository"]},"repository":{"type":"string"},"path":{"type":"string"}},"required":["type","repository","path"],"additionalProperties":false}');
+module.exports = JSON.parse('{"$schema":"http://json-schema.org/draft-07/schema#","type":"object","properties":{"provider":{"type":"string","enum":["repository"]},"repository":{"type":"string"},"path":{"type":"string"}},"required":["type","repository","path"],"additionalProperties":false}');
 
 /***/ })
 
