@@ -4,7 +4,7 @@
   "properties": {
     "provider": {
       "type": "string",
-      "enum": ["repository"]
+      "enum": ["repository", "payload"]
     },
     "repository": {
       "type": "string"
@@ -14,27 +14,45 @@
     },
     "gh-account-owner": {
       "type": "string"
+    },
+    "document": {
+      "type": "string"
     }
   },
   "required": ["provider"],
   "additionalProperties": false,
   "dependencies": {
     "provider": {
-      "properties": {
-        "provider": {
-          "enum": ["repository"]
+      "oneOf": [
+        {
+          "properties": {
+            "provider": {
+              "enum": ["repository"]
+            },
+            "gh-account-owner": {
+              "type": "string"
+            },
+            "repository": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": ["gh-account-owner", "repository", "path"]
         },
-        "gh-account-owner": {
-          "type": "string"
-        },
-        "repository": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
+        {
+          "properties": {
+            "provider": {
+              "enum": ["payload"]
+            },
+            "document": {
+              "type": "string"
+            }
+          },
+          "required": ["document"]
         }
-      },
-      "required": ["gh-account-owner", "repository", "path"]
+      ]
     }
   }
 }

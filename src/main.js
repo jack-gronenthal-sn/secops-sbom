@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const {validateInputArguments} = require('./utils/validator');
-const {validatableSchemas} = require('./utils/schema/schemaUtils');
+const {validatableSchemas} = require('./utils/schema/schemaTypes');
+const {providerTypes} = require('./utils/providerTypes');
 const {checkout} = require('./utils/checkout');
 const {upload} = require('./api/upload');
 
@@ -15,13 +16,17 @@ async function main() {
         const secretParameters = ['sn-sbom-user', 'sn-sbom-password', 'sn-instance-url', 'gh-token'];
         const secrets = secretParameters.reduce((acc, arg) => ({...acc, [arg]: core.getInput(arg)}), {});
         if (!args) {
-            const parameters = ['provider', 'repository', 'path', 'gh-account-owner'];
+            const parameters = ['provider', 'repository', 'path', 'gh-account-owner', 'document'];
             args = parameters.reduce((acc, arg) => ({...acc, [arg]: core.getInput(arg)}), {});
             schemaToValidate = validatableSchemas.DIRECT;
         }
         validateInputArguments(args, schemaToValidate);
 
-        if (args.provider === 'repository') {
+        /**
+         * Checks out the provider GitHub repository and returns the specified SBOM document.
+         * @returns {Promise<*>} The SBOM document pointed to by the configured file path.
+         */
+        const repository = async () => {
             // Clone repository contents
             const token = core.getInput('gh-token');
             const checkoutOptions = {
@@ -30,18 +35,29 @@ async function main() {
                 path: args.path,
                 owner: args["gh-account-owner"]
             }
-            const document = await checkout(checkoutOptions);
-            const uploadOptions = {
-                document,
-                snInstanceUrl: secrets['sn-instance-url'],
-                snUsername: secrets['sn-sbom-user'],
-                snPassword: secrets['sn-sbom-password']
-            };
-            const data = await upload(uploadOptions);
-            console.log(`output: ${JSON.stringify(data)}`);
+            return await checkout(checkoutOptions);
         }
 
-        core.setOutput("time", "ABC");
+        const payload = () => args.document;
+
+        let document;
+        switch(args.provider) { // Allows for easily extending to more provider options.
+            case providerTypes.REPOSITORY:
+                document = await repository();
+                break;
+
+            case providerTypes.PAYLOAD:
+                document = payload();
+                break;
+        }
+
+        const uploadOptions = {
+            document,
+            snInstanceUrl: secrets['sn-instance-url'],
+            snUsername: secrets['sn-sbom-user'],
+            snPassword: secrets['sn-sbom-password']
+        };
+        return await upload(uploadOptions);
     } catch (error) {
         core.setFailed(error.message);
     }
