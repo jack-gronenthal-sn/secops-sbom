@@ -36503,7 +36503,7 @@ module.exports = { ValidationError };
 /***/ 5939:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const schema = __nccwpck_require__(1907);
+const schema = __nccwpck_require__(434);
 const Ajv = __nccwpck_require__(931);
 const ajv = new Ajv();
 const validate = ajv.compile(schema);
@@ -36518,14 +36518,6 @@ function validateInputArguments(arguments) {
 }
 
 module.exports = {validateInputArguments};
-
-/***/ }),
-
-/***/ 1907:
-/***/ ((module) => {
-
-module.exports = eval("require")("./utils/schema/inputs.json");
-
 
 /***/ }),
 
@@ -38391,6 +38383,14 @@ module.exports = JSON.parse('{"$id":"https://raw.githubusercontent.com/ajv-valid
 
 "use strict";
 module.exports = JSON.parse('{"$schema":"http://json-schema.org/draft-07/schema#","$id":"http://json-schema.org/draft-07/schema#","title":"Core schema meta-schema","definitions":{"schemaArray":{"type":"array","minItems":1,"items":{"$ref":"#"}},"nonNegativeInteger":{"type":"integer","minimum":0},"nonNegativeIntegerDefault0":{"allOf":[{"$ref":"#/definitions/nonNegativeInteger"},{"default":0}]},"simpleTypes":{"enum":["array","boolean","integer","null","number","object","string"]},"stringArray":{"type":"array","items":{"type":"string"},"uniqueItems":true,"default":[]}},"type":["object","boolean"],"properties":{"$id":{"type":"string","format":"uri-reference"},"$schema":{"type":"string","format":"uri"},"$ref":{"type":"string","format":"uri-reference"},"$comment":{"type":"string"},"title":{"type":"string"},"description":{"type":"string"},"default":true,"readOnly":{"type":"boolean","default":false},"examples":{"type":"array","items":true},"multipleOf":{"type":"number","exclusiveMinimum":0},"maximum":{"type":"number"},"exclusiveMaximum":{"type":"number"},"minimum":{"type":"number"},"exclusiveMinimum":{"type":"number"},"maxLength":{"$ref":"#/definitions/nonNegativeInteger"},"minLength":{"$ref":"#/definitions/nonNegativeIntegerDefault0"},"pattern":{"type":"string","format":"regex"},"additionalItems":{"$ref":"#"},"items":{"anyOf":[{"$ref":"#"},{"$ref":"#/definitions/schemaArray"}],"default":true},"maxItems":{"$ref":"#/definitions/nonNegativeInteger"},"minItems":{"$ref":"#/definitions/nonNegativeIntegerDefault0"},"uniqueItems":{"type":"boolean","default":false},"contains":{"$ref":"#"},"maxProperties":{"$ref":"#/definitions/nonNegativeInteger"},"minProperties":{"$ref":"#/definitions/nonNegativeIntegerDefault0"},"required":{"$ref":"#/definitions/stringArray"},"additionalProperties":{"$ref":"#"},"definitions":{"type":"object","additionalProperties":{"$ref":"#"},"default":{}},"properties":{"type":"object","additionalProperties":{"$ref":"#"},"default":{}},"patternProperties":{"type":"object","additionalProperties":{"$ref":"#"},"propertyNames":{"format":"regex"},"default":{}},"dependencies":{"type":"object","additionalProperties":{"anyOf":[{"$ref":"#"},{"$ref":"#/definitions/stringArray"}]}},"propertyNames":{"$ref":"#"},"const":true,"enum":{"type":"array","items":true,"minItems":1,"uniqueItems":true},"type":{"anyOf":[{"$ref":"#/definitions/simpleTypes"},{"type":"array","items":{"$ref":"#/definitions/simpleTypes"},"minItems":1,"uniqueItems":true}]},"format":{"type":"string"},"contentMediaType":{"type":"string"},"contentEncoding":{"type":"string"},"if":{"$ref":"#"},"then":{"$ref":"#"},"else":{"$ref":"#"},"allOf":{"$ref":"#/definitions/schemaArray"},"anyOf":{"$ref":"#/definitions/schemaArray"},"oneOf":{"$ref":"#/definitions/schemaArray"},"not":{"$ref":"#"}},"default":true}');
+
+/***/ }),
+
+/***/ 434:
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"$id":"jack-gronenthal-sn/sbom-action-beta/input.schema.json","title":"Input","description":"The schema of the input object accepted by the Vulnerability Response GitHub Action.","type":"object","properties":{"provider":{"description":"The mechanism that provides the BOM document.","type":"object","properties":{"repository":{"type":"object","properties":{"repositoryName":{"type":"string","description":"The fully qualified name of the repository from which the BOM document is sourced."},"path":{"type":"string","description":"The path from repository root to BOM document."},"ref":{"type":"string","description":"The branch, hash, or tag the Action will checkout. Defaults to main branch."}},"required":["repositoryName","path"],"additionalProperties":false},"payload":{"type":"object","properties":{"type":{"type":"string","description":"The file format of the provided payload."},"document":{"description":"The JSON or XML based BOM document."}},"required":["document"],"additionalProperties":false,"oneOf":[{"type":"object","required":["document","type"],"properties":{"type":{"enum":["json"]},"document":{"type":"object"}}}]},"remote":{"type":"object"},"type":{"enum":["repository","payload","remote"]}},"required":["type"],"oneOf":[{"type":"object","required":["repository"],"properties":{"type":{"enum":["repository"]}}},{"type":"object","required":["remote"],"properties":{"type":{"enum":["remote"]}}},{"type":"object","required":["payload"],"properties":{"type":{"enum":["payload"]}}}],"additionalProperties":false},"summary":{"description":"Options to configure summary output of Action on GitHub.","type":"object","properties":{"doSummarize":{"type":"boolean","description":"Assert for summaries to auto-generate on GitHub.","default":true}}}},"required":["provider"]}');
 
 /***/ })
 

@@ -1,4 +1,4 @@
-const schema = require('./utils/schema/inputs.json');
+const schema = require('./schema/inputs.json');
 const Ajv = require('ajv');
 const ajv = new Ajv();
 const validate = ajv.compile(schema);
