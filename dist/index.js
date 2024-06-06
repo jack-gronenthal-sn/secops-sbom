@@ -36500,6 +36500,33 @@ module.exports = { ValidationError };
 
 /***/ }),
 
+/***/ 7404:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const github = __nccwpck_require__(8962);
+
+/**
+ * Checks out the SBOM document at a given path within the supplied repository.
+ * @param token The GitHub token for the provider repository.
+ * @param repo The name of the provider GitHub repository.
+ * @param path The absolute path to the SBOM document from the root of the provider GitHub repository.
+ * @param owner The name of the owner of the provider GitHub repository.
+ */
+async function checkout({token, repo, path, owner}) {
+    const gh = github.getOctokit(token);
+    const document = await gh.request(`GET /repos/{owner}/{repo}/contents/{path}`, {
+        owner, path, repo, headers: {
+            'X-GitHub-Api-Version': '2022-11-28'
+        }
+    });
+    console.log(document);
+    return document;
+}
+
+module.exports = {checkout};
+
+/***/ }),
+
 /***/ 1410:
 /***/ ((module) => {
 
@@ -38411,7 +38438,7 @@ module.exports = JSON.parse('{"$id":"jack-gronenthal-sn/sbom-action-beta/input.s
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"$schema":"http://json-schema.org/draft-07/schema#","type":"object","properties":{"provider":{"type":"string","enum":["repository"]},"repository":{"type":"string"},"path":{"type":"string"}},"required":["provider"],"additionalProperties":false}');
+module.exports = JSON.parse('{"$schema":"http://json-schema.org/draft-07/schema#","type":"object","properties":{"provider":{"type":"string","enum":["repository"]},"repository":{"type":"string"},"path":{"type":"string"},"gh-account-owner":{"type":"string"}},"required":["provider"],"additionalProperties":false,"dependencies":{"provider":{"properties":{"provider":{"enum":["repository"]},"gh-account-owner":{"type":"string"},"repository":{"type":"string"},"path":{"type":"string"}},"required":["gh-account-owner","repository","path"]}}}');
 
 /***/ })
 
@@ -38457,32 +38484,45 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(3811);
-const github = __nccwpck_require__(8962);
 const { validateInputArguments } = __nccwpck_require__(5939);
 const { validatableSchemas } = __nccwpck_require__(1410);
+const { checkout } = __nccwpck_require__(7404);
 
 /**
  * @description This function executes the SBOM Workspace GitHub Action Sequence.
  * @note The action expects arguments to either come aggregated or non-aggregated. When the `args` input is asserted, its values are prioritized. Otherwise, the expected input structure is recreated for validation purposes.
  */
-function main() {
+async function main() {
     try {
-        const parameters = [ 'provider', 'repository', 'path' ];
-
-        let arguments = core.getInput('args'), schemaToValidate = validatableSchemas.AGGREGATED;
-        if(!arguments) {
-            arguments = parameters.reduce((acc, arg) => ({ ...acc, [arg]: core.getInput(arg) }), {});
+        // Validate the inputs
+        let args = core.getInput('args'), schemaToValidate = validatableSchemas.AGGREGATED;
+        if(!args) {
+            const parameters = [ 'provider', 'repository', 'path', 'gh-account-owner' ];
+            args = parameters.reduce((acc, arg) => ({ ...acc, [arg]: core.getInput(arg) }), {});
             schemaToValidate = validatableSchemas.DIRECT;
         }
+        validateInputArguments(args, schemaToValidate);
 
-        validateInputArguments(arguments, schemaToValidate);
+        if(args.provider === 'repository') {
+            // Clone repository contents
+            const token = core.getInput('gh-token');
+            const options = {
+                token,
+                repo: args.repository,
+                path: args.path,
+                owner: args["gh-account-owner"]
+            }
+            const document = await checkout(options);
+        }
+
         core.setOutput("time", "ABC");
+        return "DONE";
     } catch (error) {
         core.setFailed(error.message);
     }
 }
 
-main();
+main().then(resp => console.log(resp));
 
 })();
 

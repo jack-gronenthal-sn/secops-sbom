@@ -12,8 +12,14 @@ inputs:
   sn-instance-url:
     description: 'The URL of the ServiceNow Platform instance.'
     required: true
+  gh-token:
+    description: 'The GitHub Token of the SBOM provider repository.'
+    required: false
 
   # Arguments
+  gh-account-owner:
+    description: 'The owner of the provider GitHub repository.'
+    required: false
   provider:
     description: 'The provider type.'
     required: true

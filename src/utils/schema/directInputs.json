@@ -11,8 +11,30 @@
     },
     "path": {
       "type": "string"
+    },
+    "gh-account-owner": {
+      "type": "string"
     }
   },
-  "required": [ "provider" ],
-  "additionalProperties": false
+  "required": ["provider"],
+  "additionalProperties": false,
+  "dependencies": {
+    "provider": {
+      "properties": {
+        "provider": {
+          "enum": ["repository"]
+        },
+        "gh-account-owner": {
+          "type": "string"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": ["gh-account-owner", "repository", "path"]
+    }
+  }
 }
