@@ -36510,7 +36510,6 @@ const validate = ajv.compile(schema);
 const {ValidationError} = __nccwpck_require__(2719);
 
 function validateInputArguments(arguments) {
-    console.log(arguments);
     const valid = validate(arguments);
     if (!valid) {
         throw new ValidationError(`An error occurred while validating the input arguments: ${JSON.stringify(arguments, null, 2)}`, validate.errors);
@@ -38439,10 +38438,19 @@ const core = __nccwpck_require__(3811);
 const github = __nccwpck_require__(8962);
 const { validateInputArguments } = __nccwpck_require__(5939);
 
+/**
+ * @description This function executes the SBOM Workspace GitHub Action Sequence.
+ * @note The action expects arguments to either come aggregated or non-aggregated. When the `args` input is asserted, its values are prioritized. Otherwise, the expected input structure is recreated for validation purposes.
+ */
 function main() {
     try {
-        const parameters = [ 'args', 'provider', 'repository', 'path' ];
-        const arguments = parameters.reduce((acc, arg) => ({ ...acc, [arg]: core.getInput(arg) }), {});
+        const parameters = [ 'provider', 'repository', 'path' ];
+
+        let arguments = core.getInput('args');
+        if(!arguments) {
+            arguments = parameters.reduce((acc, arg) => ({ ...acc, [arg]: core.getInput(arg) }), {});
+        }
+
         validateInputArguments(arguments);
         core.setOutput("time", "ABC");
     } catch (error) {
