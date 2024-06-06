@@ -18,7 +18,6 @@ inputs:
     description: 'The provider type.'
     required: true
     default: 'repository'
-
   args:
     description: "An object that captures the action's arguments."
     required: false

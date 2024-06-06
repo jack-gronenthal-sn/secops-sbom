@@ -36500,16 +36500,30 @@ module.exports = { ValidationError };
 
 /***/ }),
 
+/***/ 1410:
+/***/ ((module) => {
+
+const validatableSchemas = Object.freeze({
+    DIRECT: 0,
+    AGGREGATED: 1
+});
+
+module.exports = { validatableSchemas };
+
+/***/ }),
+
 /***/ 5939:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const schema = __nccwpck_require__(434);
+const aggregatedInputSchema = __nccwpck_require__(7822);
+const directInputSchema = __nccwpck_require__(6044);
+const { validatableSchemas } = __nccwpck_require__(1410);
 const Ajv = __nccwpck_require__(931);
 const ajv = new Ajv();
-const validate = ajv.compile(schema);
 const {ValidationError} = __nccwpck_require__(2719);
 
-function validateInputArguments(arguments) {
+function validateInputArguments(arguments, schemaToValidate) {
+    let validate = ajv.compile(validatableSchemas.AGGREGATED === schemaToValidate ? aggregatedInputSchema : directInputSchema);
     const valid = validate(arguments);
     if (!valid) {
         throw new ValidationError(`An error occurred while validating the input arguments: ${JSON.stringify(arguments, null, 2)}`, validate.errors);
@@ -38385,11 +38399,19 @@ module.exports = JSON.parse('{"$schema":"http://json-schema.org/draft-07/schema#
 
 /***/ }),
 
-/***/ 434:
+/***/ 7822:
 /***/ ((module) => {
 
 "use strict";
 module.exports = JSON.parse('{"$id":"jack-gronenthal-sn/sbom-action-beta/input.schema.json","title":"Input","description":"The schema of the input object accepted by the Vulnerability Response GitHub Action.","type":"object","properties":{"provider":{"description":"The mechanism that provides the BOM document.","type":"object","properties":{"repository":{"type":"object","properties":{"repositoryName":{"type":"string","description":"The fully qualified name of the repository from which the BOM document is sourced."},"path":{"type":"string","description":"The path from repository root to BOM document."},"ref":{"type":"string","description":"The branch, hash, or tag the Action will checkout. Defaults to main branch."}},"required":["repositoryName","path"],"additionalProperties":false},"payload":{"type":"object","properties":{"type":{"type":"string","description":"The file format of the provided payload."},"document":{"description":"The JSON or XML based BOM document."}},"required":["document"],"additionalProperties":false,"oneOf":[{"type":"object","required":["document","type"],"properties":{"type":{"enum":["json"]},"document":{"type":"object"}}}]},"remote":{"type":"object"},"type":{"enum":["repository","payload","remote"]}},"required":["type"],"oneOf":[{"type":"object","required":["repository"],"properties":{"type":{"enum":["repository"]}}},{"type":"object","required":["remote"],"properties":{"type":{"enum":["remote"]}}},{"type":"object","required":["payload"],"properties":{"type":{"enum":["payload"]}}}],"additionalProperties":false},"summary":{"description":"Options to configure summary output of Action on GitHub.","type":"object","properties":{"doSummarize":{"type":"boolean","description":"Assert for summaries to auto-generate on GitHub.","default":true}}}},"required":["provider"]}');
+
+/***/ }),
+
+/***/ 6044:
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"$schema":"http://json-schema.org/draft-07/schema#","type":"object","properties":{"type":{"type":"string","enum":["repository"]},"repository":{"type":"string"},"path":{"type":"string"}},"required":["type","repository","path"],"additionalProperties":false}');
 
 /***/ })
 
@@ -38437,6 +38459,7 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(3811);
 const github = __nccwpck_require__(8962);
 const { validateInputArguments } = __nccwpck_require__(5939);
+const { validatableSchemas } = __nccwpck_require__(1410);
 
 /**
  * @description This function executes the SBOM Workspace GitHub Action Sequence.
@@ -38446,12 +38469,13 @@ function main() {
     try {
         const parameters = [ 'provider', 'repository', 'path' ];
 
-        let arguments = core.getInput('args');
+        let arguments = core.getInput('args'), schemaToValidate = validatableSchemas.AGGREGATED;
         if(!arguments) {
             arguments = parameters.reduce((acc, arg) => ({ ...acc, [arg]: core.getInput(arg) }), {});
+            schemaToValidate = validatableSchemas.DIRECT;
         }
 
-        validateInputArguments(arguments);
+        validateInputArguments(arguments, schemaToValidate);
         core.setOutput("time", "ABC");
     } catch (error) {
         core.setFailed(error.message);
