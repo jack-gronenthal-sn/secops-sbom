@@ -33,6 +33,9 @@ inputs:
   path:
     description: 'The absolute path from repository root to the SBOM document to be picked.'
     required: false
+  document:
+    description: 'The stringified JSON SBOM document.'
+    required: false
 
 outputs:
   time: # id of output
