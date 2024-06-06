@@ -1,10 +1,23 @@
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'SBOM Workspace Action'
+description: 'An action for facilitating interfacing with ServiceNow SBOM Workspace.'
 inputs:
   who-to-greet:  # id of input
     description: 'Who to greet'
     required: true
     default: 'World'
+  sn-sbom-user:
+    description: 'Platform Username.'
+    required: true
+  sn-sbom-password:
+    description: 'Platform Password.'
+    required: true
+  sn-instance-url:
+    description: 'The URL of the ServiceNow Platform instance.'
+    required: true
+  provider:
+    description: 'The provider type.'
+    required: true
+    default: 'repository'
 outputs:
   time: # id of output
     description: 'The time we greeted you'
