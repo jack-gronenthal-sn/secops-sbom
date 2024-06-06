@@ -36484,6 +36484,17 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 5133:
+/***/ ((module) => {
+
+function upload(options) {
+    console.log(options)
+}
+
+module.exports = { upload };
+
+/***/ }),
+
 /***/ 2719:
 /***/ ((module) => {
 
@@ -38485,9 +38496,10 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(3811);
-const { validateInputArguments } = __nccwpck_require__(5939);
-const { validatableSchemas } = __nccwpck_require__(1410);
-const { checkout } = __nccwpck_require__(7404);
+const {validateInputArguments} = __nccwpck_require__(5939);
+const {validatableSchemas} = __nccwpck_require__(1410);
+const {checkout} = __nccwpck_require__(7404);
+const {upload} = __nccwpck_require__(5133);
 
 /**
  * @description This function executes the SBOM Workspace GitHub Action Sequence.
@@ -38497,28 +38509,35 @@ async function main() {
     try {
         // Validate the inputs
         let args = core.getInput('args'), schemaToValidate = validatableSchemas.AGGREGATED;
-        if(!args) {
-            const parameters = [ 'provider', 'repository', 'path', 'gh-account-owner' ];
-            args = parameters.reduce((acc, arg) => ({ ...acc, [arg]: core.getInput(arg) }), {});
+        const secretParameters = ['sn-sbom-user', 'sn-sbom-password', 'sn-instance-url', 'gh-token'];
+        const secrets = secretParameters.reduce((acc, arg) => ({...acc, [arg]: core.getInput(arg)}), {});
+        if (!args) {
+            const parameters = ['provider', 'repository', 'path', 'gh-account-owner'];
+            args = parameters.reduce((acc, arg) => ({...acc, [arg]: core.getInput(arg)}), {});
             schemaToValidate = validatableSchemas.DIRECT;
         }
         validateInputArguments(args, schemaToValidate);
 
-        if(args.provider === 'repository') {
+        if (args.provider === 'repository') {
             // Clone repository contents
             const token = core.getInput('gh-token');
-            const options = {
+            const checkoutOptions = {
                 token,
                 repo: args.repository,
                 path: args.path,
                 owner: args["gh-account-owner"]
             }
-            const document = await checkout(options);
-            console.log(document);
+            const document = await checkout(checkoutOptions);
+            const uploadOptions = {
+                document,
+                snInstanceUrl: secrets['sn-instance-url'],
+                snUsername: secrets['sn-sbom-user'],
+                snPassword: secrets['sn-sbom-password']
+            };
+            upload(uploadOptions);
         }
 
         core.setOutput("time", "ABC");
-        return "DONE";
     } catch (error) {
         core.setFailed(error.message);
     }
