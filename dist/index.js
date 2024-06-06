@@ -36487,11 +36487,28 @@ function wrappy (fn, cb) {
 /***/ 5133:
 /***/ ((module) => {
 
-function upload(options) {
-    console.log(options)
+async function upload({document, snInstanceUrl, snUsername, snPassword}) {
+
+    let baseUrl = new URL(snInstanceUrl);
+    let uploadUrl = new URL('/api/sbom/core/upload', baseUrl);
+
+    return await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${Buffer.from(snUsername + ":" + snPassword).toString('base64')}`
+        },
+        body: JSON.stringify(document)
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+            return data;
+        })
+        .catch(error => console.log(error))
 }
 
-module.exports = { upload };
+module.exports = {upload};
 
 /***/ }),
 
@@ -38534,7 +38551,8 @@ async function main() {
                 snUsername: secrets['sn-sbom-user'],
                 snPassword: secrets['sn-sbom-password']
             };
-            upload(uploadOptions);
+            const data = await upload(uploadOptions);
+            console.log(`output: ${JSON.stringify(data)}`);
         }
 
         core.setOutput("time", "ABC");

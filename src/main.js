@@ -37,7 +37,8 @@ async function main() {
                 snUsername: secrets['sn-sbom-user'],
                 snPassword: secrets['sn-sbom-password']
             };
-            upload(uploadOptions);
+            const data = await upload(uploadOptions);
+            console.log(`output: ${JSON.stringify(data)}`);
         }
 
         core.setOutput("time", "ABC");
