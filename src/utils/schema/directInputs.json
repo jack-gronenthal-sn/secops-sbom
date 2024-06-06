@@ -13,6 +13,6 @@
       "type": "string"
     }
   },
-  "required": ["type", "repository", "path"],
+  "required": [ "provider" ],
   "additionalProperties": false
 }
