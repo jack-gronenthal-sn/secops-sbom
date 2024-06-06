@@ -31035,6 +31035,14 @@ function parseParams (str) {
 module.exports = parseParams
 
 
+/***/ }),
+
+/***/ 434:
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"$id":"jack-gronenthal-sn/sbom-action-beta/input.schema.json","title":"Input","description":"The schema of the input object accepted by the Vulnerability Response GitHub Action.","type":"object","properties":{"provider":{"description":"The mechanism that provides the BOM document.","type":"object","properties":{"repository":{"type":"object","properties":{"repositoryName":{"type":"string","description":"The fully qualified name of the repository from which the BOM document is sourced."},"path":{"type":"string","description":"The path from repository root to BOM document."},"ref":{"type":"string","description":"The branch, hash, or tag the Action will checkout. Defaults to main branch."}},"required":["repositoryName","path"],"additionalProperties":false},"payload":{"type":"object","properties":{"type":{"type":"string","description":"The file format of the provided payload."},"document":{"description":"The JSON or XML based BOM document."}},"required":["document"],"additionalProperties":false,"oneOf":[{"type":"object","required":["document","type"],"properties":{"type":{"enum":["json"]},"document":{"type":"object"}}}]},"remote":{"type":"object"},"type":{"enum":["repository","payload","remote"]}},"required":["type"],"oneOf":[{"type":"object","required":["repository"],"properties":{"type":{"enum":["repository"]}}},{"type":"object","required":["remote"],"properties":{"type":{"enum":["remote"]}}},{"type":"object","required":["payload"],"properties":{"type":{"enum":["payload"]}}}],"additionalProperties":false},"summary":{"description":"Options to configure summary output of Action on GitHub.","type":"object","properties":{"doSummarize":{"type":"boolean","description":"Assert for summaries to auto-generate on GitHub.","default":true}}}},"required":["provider"]}');
+
 /***/ })
 
 /******/ 	});
@@ -31080,6 +31088,7 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(3811);
 const github = __nccwpck_require__(8962);
+const inputSchema = __nccwpck_require__(434);
 
 try {
     // `who-to-greet` input defined in action metadata file
@@ -31088,6 +31097,7 @@ try {
     const arguments = parameters.reduce((acc, arg) => ({ ...acc, [arg]: core.getInput(arg) }), {});
 
     console.log(`Arguments ${JSON.stringify(arguments, null, 2)}`);
+    console.log(`Input schema: ${inputSchema}`);
     core.setOutput("time", "ABC");
 
     // Get the JSON webhook payload for the event that triggered the workflow
