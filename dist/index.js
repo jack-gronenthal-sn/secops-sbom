@@ -31083,10 +31083,9 @@ const github = __nccwpck_require__(8962);
 
 try {
     // `who-to-greet` input defined in action metadata file
-    const providerType = core.getInput('provider');
 
-
-    const arguments = { providerType };
+    const parameters = [ 'args', 'provider', 'repository', 'path' ];
+    const arguments = parameters.reduce((acc, arg) => ({ ...acc, [arg]: core.getInput(arg) }), {});
 
     console.log(`Arguments ${JSON.stringify(arguments, null, 2)}`);
     core.setOutput("time", "ABC");
