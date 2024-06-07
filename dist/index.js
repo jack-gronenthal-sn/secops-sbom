@@ -36524,7 +36524,7 @@ const github = __nccwpck_require__(8962);
  * @param path The absolute path to the SBOM document from the root of the provider GitHub repository.
  * @param owner The name of the owner of the provider GitHub repository.
  */
-async function checkout({token, repo, path, owner}) {
+async function checkout({token, owner, repo, path}) {
     const gh = github.getOctokit(token);
     const resp = await gh.request(`GET /repos/{owner}/{repo}/contents/{path}`, {
         owner, path, repo, headers: {
@@ -36585,20 +36585,39 @@ module.exports = { validatableSchemas };
 
 const aggregatedInputSchema = __nccwpck_require__(7822);
 const directInputSchema = __nccwpck_require__(6044);
-const { validatableSchemas } = __nccwpck_require__(978);
+const {validatableSchemas} = __nccwpck_require__(978);
 const Ajv = __nccwpck_require__(931);
 const ajv = new Ajv();
 const {ValidationError} = __nccwpck_require__(6800);
 
-function validateInputArguments(arguments, schemaToValidate) {
-    let validate = ajv.compile(validatableSchemas.AGGREGATED === schemaToValidate ? aggregatedInputSchema : directInputSchema);
-    const valid = validate(arguments);
+function validateInputArguments(args) {
+    let validate = ajv.compile(directInputSchema);
+    const valid = validate(args);
     if (!valid) {
-        throw new ValidationError(`An error occurred while validating the input arguments: ${JSON.stringify(arguments, null, 2)}`, validate.errors);
+        throw new ValidationError(`An error occurred while validating the input arguments: ${JSON.stringify(args, null, 2)}`, validate.errors);
     }
 }
 
-module.exports = {validateInputArguments};
+async function validateSpdxDocument(document, version) {
+    return true;
+}
+
+async function validateCyclonedxDocument(document, version) {
+    return true;
+}
+
+async function validateDocument(document) {
+    const type = Object.hasOwn(document, "bomFormat") ? "CycloneDX" :
+        (Object.hasOwn(document, "SPDXID") ? "SPDX" : undefined);
+    if(type === undefined) { throw new Error('Invalid SBOM document type provided. SBOM Workspace only accepts the SPDX and CycloneDX specifications.'); }
+    const version = type === "CycloneDX" ? document.specVersion : document.spdxVersion;
+    const isValid = type === "CycloneDX" ?
+        await validateCyclonedxDocument(document, version) :
+        await validateSpdxDocument(document, version);
+    return isValid;
+}
+
+module.exports = {validateInputArguments, validateDocument};
 
 /***/ }),
 
@@ -38525,7 +38544,7 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(3811);
-const {validateInputArguments} = __nccwpck_require__(5939);
+const {validateInputArguments, validateDocument} = __nccwpck_require__(5939);
 const {validatableSchemas} = __nccwpck_require__(978);
 const {providerTypes} = __nccwpck_require__(769);
 const {checkout} = __nccwpck_require__(7404);
@@ -38538,15 +38557,11 @@ const {upload} = __nccwpck_require__(5133);
 async function main() {
     try {
         // Validate the inputs
-        let args = core.getInput('args'), schemaToValidate = validatableSchemas.AGGREGATED;
         const secretParameters = ['sn-sbom-user', 'sn-sbom-password', 'sn-instance-url', 'gh-token'];
         const secrets = secretParameters.reduce((acc, arg) => ({...acc, [arg]: core.getInput(arg)}), {});
-        if (!args) {
-            const parameters = ['provider', 'repository', 'path', 'gh-account-owner', 'document'];
-            args = parameters.reduce((acc, arg) => ({...acc, [arg]: core.getInput(arg)}), {});
-            schemaToValidate = validatableSchemas.DIRECT;
-        }
-        validateInputArguments(args, schemaToValidate);
+        const parameters = ['provider', 'repository', 'path', 'gh-account-owner', 'document', 'validateDocument' ];
+        const args = parameters.reduce((acc, arg) => ({...acc, [arg]: core.getInput(arg)}), {});
+        validateInputArguments(args);
 
         /**
          * Checks out the provider GitHub repository and returns the specified SBOM document.
@@ -38576,6 +38591,8 @@ async function main() {
                 document = payload();
                 break;
         }
+
+        if(ags.validateDocument) { validateDocument(document); }
 
         const uploadOptions = {
             document,

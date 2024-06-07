@@ -36,6 +36,10 @@ inputs:
   document:
     description: 'The stringified JSON SBOM document.'
     required: false
+  validateDocument:
+    description: 'Optionally validate SBOM document against appropriate specification identified from the document.'
+    required: false
+    default: 'false'
 
 outputs:
   time: # id of output

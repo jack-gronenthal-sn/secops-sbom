@@ -7,7 +7,7 @@ const github = require('@actions/github');
  * @param path The absolute path to the SBOM document from the root of the provider GitHub repository.
  * @param owner The name of the owner of the provider GitHub repository.
  */
-async function checkout({token, repo, path, owner}) {
+async function checkout({token, owner, repo, path}) {
     const gh = github.getOctokit(token);
     const resp = await gh.request(`GET /repos/{owner}/{repo}/contents/{path}`, {
         owner, path, repo, headers: {

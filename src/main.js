@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const {validateInputArguments} = require('./utils/validator');
+const {validateInputArguments, validateDocument} = require('./utils/validator');
 const {validatableSchemas} = require('./utils/schema/schemaTypes');
 const {providerTypes} = require('./utils/providerTypes');
 const {checkout} = require('./utils/checkout');
@@ -12,15 +12,11 @@ const {upload} = require('./api/upload');
 async function main() {
     try {
         // Validate the inputs
-        let args = core.getInput('args'), schemaToValidate = validatableSchemas.AGGREGATED;
         const secretParameters = ['sn-sbom-user', 'sn-sbom-password', 'sn-instance-url', 'gh-token'];
         const secrets = secretParameters.reduce((acc, arg) => ({...acc, [arg]: core.getInput(arg)}), {});
-        if (!args) {
-            const parameters = ['provider', 'repository', 'path', 'gh-account-owner', 'document'];
-            args = parameters.reduce((acc, arg) => ({...acc, [arg]: core.getInput(arg)}), {});
-            schemaToValidate = validatableSchemas.DIRECT;
-        }
-        validateInputArguments(args, schemaToValidate);
+        const parameters = ['provider', 'repository', 'path', 'gh-account-owner', 'document', 'validateDocument' ];
+        const args = parameters.reduce((acc, arg) => ({...acc, [arg]: core.getInput(arg)}), {});
+        validateInputArguments(args);
 
         /**
          * Checks out the provider GitHub repository and returns the specified SBOM document.
@@ -50,6 +46,8 @@ async function main() {
                 document = payload();
                 break;
         }
+
+        if(ags.validateDocument) { validateDocument(document); }
 
         const uploadOptions = {
             document,
