@@ -1,4 +1,4 @@
-const github = require('@actions/github');
+import github from '@actions/github';
 
 /**
  * Checks out the SBOM document at a given path within the supplied repository.
@@ -7,7 +7,7 @@ const github = require('@actions/github');
  * @param path The absolute path to the SBOM document from the root of the provider GitHub repository.
  * @param owner The name of the owner of the provider GitHub repository.
  */
-async function checkout({token, owner, repo, path}) {
+export async function checkout({token, owner, repo, path}) {
     const gh = github.getOctokit(token);
     const resp = await gh.request(`GET /repos/{owner}/{repo}/contents/{path}`, {
         owner, path, repo, headers: {
@@ -18,5 +18,3 @@ async function checkout({token, owner, repo, path}) {
     const document = resp.data;
     return JSON.parse(document);
 }
-
-module.exports = {checkout};
